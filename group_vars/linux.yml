@@ -15,7 +15,9 @@ patch: true
 # --- FireEye Agent (local .tgz on control node) ---
 fireeye_package: files/IMAGE_HX_AGENT_LINUX_36.30.37.tgz
 
-# --- Patching ---
+# Patching
+# Security filtering (yum/dnf) - defaults to false for CentOS as it lacks errata support
+patching_security_only: false
 # Reboot the server automatically after patching if required
 patching_auto_reboot: true
 patching_reboot_timeout: 600

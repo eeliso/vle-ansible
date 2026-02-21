@@ -32,11 +32,19 @@
           if grep -q "release 7" /etc/centos-release 2>/dev/null; then
             sed -i 's|^mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/CentOS-*.repo
             sed -i 's|^#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo
+            if [ -f /etc/yum.repos.d/epel.repo ]; then
+              sed -i 's|^mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/epel.repo
+              sed -i 's|^#*baseurl=http://download.fedoraproject.org/pub/epel/|baseurl=https://archives.fedoraproject.org/pub/archive/epel/|g' /etc/yum.repos.d/epel.repo
+            fi
             yum clean all
             echo "CentOS 7 repos fixed to vault.centos.org"
           elif grep -q "release 8" /etc/centos-release 2>/dev/null; then
             sed -i 's|^mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/CentOS-*.repo
             sed -i 's|^#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo
+            if [ -f /etc/yum.repos.d/epel.repo ]; then
+              sed -i 's|^mirrorlist=|#mirrorlist=|g' /etc/yum.repos.d/epel.repo
+              sed -i 's|^#*baseurl=http://download.fedoraproject.org/pub/epel/|baseurl=https://archives.fedoraproject.org/pub/archive/epel/|g' /etc/yum.repos.d/epel.repo
+            fi
             dnf clean all
             echo "CentOS 8 repos fixed to vault.centos.org"
           fi
