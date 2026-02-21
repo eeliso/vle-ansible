@@ -1,0 +1,31 @@
+---
+# =============================================================================
+# Windows Group Variables
+# =============================================================================
+
+# --- Connection ---
+ansible_connection: winrm
+ansible_port: 5986
+ansible_winrm_transport: ntlm
+ansible_winrm_server_cert_validation: ignore
+ansible_user: Administrator
+
+# --- Defaults ---
+config_dest_dir: C:\ProgramData\configs\
+patch: true
+
+# --- FireEye Agent (local .zip on control node) ---
+fireeye_package: files/IMAGE_HX_AGENT_WIN_36.30.37.zip
+
+# --- Patching ---
+# Categories to install via Windows Update
+patching_update_categories:
+  - SecurityUpdates
+  - CriticalUpdates
+  - UpdateRollups
+
+# Reboot the server automatically after patching if required
+patching_auto_reboot: true
+patching_reboot_timeout: 1200
+
+

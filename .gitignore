@@ -1,0 +1,25 @@
+# Ansible
+*.retry
+*.pyc
+*.pyo
+.ansible/
+.venv/
+venv/
+
+# Secrets & Local variables
+.env
+vars_prompt_results.yml
+
+# Large Proprietary Binaries (Do not push to public repo)
+files/IMAGE_HX_AGENT_*
+files/*.tgz
+files/*.zip
+files/*.msi
+files/*.rpm
+files/*.deb
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*~

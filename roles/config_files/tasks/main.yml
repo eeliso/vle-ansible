@@ -1,0 +1,12 @@
+---
+# =============================================================================
+# Role: config_files — Distribute configuration files to hosts
+# =============================================================================
+# Copies files from the local `files/` directory to the remote host.
+# Only files listed in the host's `config_files` variable are copied.
+# =============================================================================
+
+- name: Run OS-specific config tasks
+  ansible.builtin.include_tasks:
+    file: "{{ (ansible_os_family == 'Windows') | ternary('windows.yml', 'linux.yml') }}"
+  when: config_files | default([]) | length > 0

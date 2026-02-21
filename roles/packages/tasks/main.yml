@@ -1,0 +1,12 @@
+---
+# =============================================================================
+# Role: packages — Install packages on Linux and Windows hosts
+# =============================================================================
+# Handles two types of packages:
+#   1. Repo-based packages (filebeat, etc.) — installed via yum/apt/Chocolatey
+#   2. FireEye agent — installed from a local .tgz/.zip on the Ansible control node
+# =============================================================================
+
+- name: Run OS-specific package tasks
+  ansible.builtin.include_tasks:
+    file: "{{ (ansible_os_family == 'Windows') | ternary('windows.yml', 'linux.yml') }}"

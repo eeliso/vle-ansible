@@ -1,0 +1,9 @@
+---
+# =============================================================================
+# Role: patching — Apply security updates on Linux and Windows hosts
+# =============================================================================
+
+- name: Run OS-specific patching tasks
+  ansible.builtin.include_tasks:
+    file: "{{ (ansible_os_family == 'Windows') | ternary('windows.yml', 'linux.yml') }}"
+  when: patch | default(true)
