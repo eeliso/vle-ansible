@@ -49,8 +49,6 @@
         state: latest
         security: "{{ patching_security_only | default(false) }}"
         update_cache: true
-        exclude:
-          - "*.i686"
       register: yum_upgrade_result
 
     - name: Display yum upgrade results

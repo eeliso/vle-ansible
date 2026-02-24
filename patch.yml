@@ -20,10 +20,10 @@
   hosts: linux
   gather_facts: true
 
-  vars_prompt:
-    - name: ansible_password
-      prompt: "Enter SSH password for Linux hosts"
-      private: true
+#  vars_prompt:
+#    - name: ansible_password
+#      prompt: "Enter SSH password for Linux hosts"
+#      private: true
 
   roles:
     - role: patching
@@ -35,10 +35,10 @@
   hosts: windows
   gather_facts: true
 
-  vars_prompt:
-    - name: ansible_password
-      prompt: "Enter WinRM password for Windows hosts"
-      private: true
+#  vars_prompt:
+#    - name: ansible_password
+#      prompt: "Enter WinRM password for Windows hosts"
+#      private: true
 
   roles:
     - role: patching
