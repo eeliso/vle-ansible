@@ -6,7 +6,7 @@
 # It sets up the environment and runs the Ansible patching playbook.
 
 # --- Configuration ---
-PROJECT_DIR="/home/ei/Dev/vle-ansible"
+PROJECT_DIR="/home/user/vle-ansible"
 LOG_FILE="${PROJECT_DIR}/patching.log"
 
 # Set your ANSIBLE_PASSWORD here if not set in your shell profile
