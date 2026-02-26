@@ -6,7 +6,7 @@
 
 - name: Copy SCC installer to Windows target
   ansible.windows.win_copy:
-    src: "scc-5.14_Windows/SCC_5.14_Windows_Setup.exe"
+    src: "files/scc-5.14_Windows/SCC_5.14_Windows_Setup.exe"
     dest: C:\Temp\scc\SCC_5.14_Windows_Setup.exe
 
 - name: Install SCC on Windows

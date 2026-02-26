@@ -8,18 +8,18 @@
 - name: Determine SCC installer source for Linux
   ansible.builtin.set_fact:
     scc_src: >-
-      {% if ansible_os_family == 'RedHat' and ansible_distribution_major_version | default('8') == '7' %}
-      scc-5.14_rhel7_x86_64/scc-5.14.rhel7.x86_64.rpm
+      {% if ansible_os_family == 'RedHat' and ansible_distribution_major_version | default('8') | string == '7' %}
+      files/scc-5.14_rhel7_x86_64/scc-5.14.rhel7.x86_64.rpm
       {% elif ansible_os_family == 'RedHat' %}
-      scc-5.14_rhel8_x86_64/scc-5.14.rhel8.x86_64.rpm
+      files/scc-5.14_rhel8_x86_64/scc-5.14.rhel8.x86_64.rpm
       {% else %}
-      scc-5.14_ubuntu18_amd64/scc-5.14.ubuntu.18_amd64.deb
+      files/scc-5.14_ubuntu18_amd64/scc-5.14.ubuntu.18_amd64.deb
       {% endif %}
     scc_ext: "{{ '.deb' if ansible_os_family == 'Debian' else '.rpm' }}"
 
 - name: Copy SCC installer to Linux target
   ansible.builtin.copy:
-    src: "{{ scc_src }}"
+    src: "{{ scc_src | trim }}"
     dest: "/tmp/scc/scc-installer{{ scc_ext }}"
     mode: '0644'
 
