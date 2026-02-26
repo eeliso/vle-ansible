@@ -18,14 +18,14 @@
 
 - name: Run SCC local scan on Windows
   ansible.windows.win_command:
-    cmd: '"C:\Program Files\SCAP Compliance Checker\cscc.exe" --scan'
+    cmd: '"C:\Program Files\SCAP Compliance Checker\cscc.exe"'
   register: scc_windows_scan
   changed_when: "scc_windows_scan.rc == 0"
   ignore_errors: true
 
 - name: Find SCC scan results archive on Windows
   ansible.windows.win_find:
-    paths: 'C:\ProgramData\SCAP Compliance Checker\Sessions'
+    paths: '{{ ansible_env.USERPROFILE }}\SCC\Sessions'
     patterns: '*_Results_*.zip'
     recurse: true
   register: scc_windows_results

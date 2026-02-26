@@ -38,14 +38,14 @@
 
 - name: Run SCC local scan on Linux
   ansible.builtin.command:
-    cmd: /opt/scc/cscc --scan
+    cmd: /opt/scc/cscc
   register: scc_linux_scan
   changed_when: "scc_linux_scan.rc == 0"
   ignore_errors: true
 
 - name: Find SCC scan results archive
   ansible.builtin.find:
-    paths: /var/opt/scc/Sessions
+    paths: "~/SCC/Sessions"
     patterns: "*_Results_*.zip"
     recurse: true
   register: scc_linux_results
