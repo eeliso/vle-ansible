@@ -6,12 +6,13 @@
 
 - name: Copy SCC installer to Windows target
   ansible.windows.win_copy:
-    src: "scc/{{ scc_windows_installer | default('SCC_Windows_Setup.msi') }}"
-    dest: C:\Temp\scc\scc-installer.msi
+    src: "scc-5.14_Windows/SCC_5.14_Windows_Setup.exe"
+    dest: C:\Temp\scc\SCC_5.14_Windows_Setup.exe
 
 - name: Install SCC on Windows
   ansible.windows.win_package:
-    path: C:\Temp\scc\scc-installer.msi
+    path: C:\Temp\scc\SCC_5.14_Windows_Setup.exe
+    arguments: /S
     state: present
 
 - name: Run SCC local scan on Windows

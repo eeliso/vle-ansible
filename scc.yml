@@ -8,11 +8,12 @@
 #   ansible-playbook scc.yml
 #
 # Prerequisite:
-#   Ensure the SCC installer distributables are placed in the "files/scc/" directory 
-#   before running the playbook. By default, it expects:
-#   - files/scc/scc-5.9.deb (for Debian/Ubuntu)
-#   - files/scc/scc-5.9.rpm (for RedHat/CentOS)
-#   - files/scc/SCC_Windows_Setup.msi (for Windows)
+#   Ensure the unzipped SCC installers are placed in the "files/" directory 
+#   before running the playbook. The expected paths are:
+#   - files/scc-5.14_ubuntu18_amd64/scc-5.14.ubuntu.18_amd64.deb (Debian/Ubuntu)
+#   - files/scc-5.14_rhel7_x86_64/scc-5.14.rhel7.x86_64.rpm (RHEL/CentOS 7)
+#   - files/scc-5.14_rhel8_x86_64/scc-5.14.rhel8.x86_64.rpm (RHEL/CentOS 8)
+#   - files/scc-5.14_Windows/SCC_5.14_Windows_Setup.exe (Windows)
 # =============================================================================
 
 - name: Install and run SCAP Compliance Checker
