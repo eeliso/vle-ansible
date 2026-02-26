@@ -21,10 +21,10 @@
   gather_facts: true
   tasks:
     - name: Apply SCC role on Linux devices
-      ansible.builtin.include_role:
-        name: scc
+      block:
+        - ansible.builtin.include_role:
+            name: scc
       when: ansible_os_family != 'Windows'
-      become: true
 
     - name: Apply SCC role on Windows devices
       ansible.builtin.include_role:
