@@ -1,0 +1,31 @@
+---
+# =============================================================================
+# SCAP Compliance Checker (SCC) Playbook
+# =============================================================================
+# Installs SCC from predefined installers and runs a local scan on all hosts.
+#
+# Usage:
+#   ansible-playbook scc.yml
+#
+# Prerequisite:
+#   Ensure the SCC installer distributables are placed in the "files/scc/" directory 
+#   before running the playbook. By default, it expects:
+#   - files/scc/scc-5.9.deb (for Debian/Ubuntu)
+#   - files/scc/scc-5.9.rpm (for RedHat/CentOS)
+#   - files/scc/SCC_Windows_Setup.msi (for Windows)
+# =============================================================================
+
+- name: Install and run SCAP Compliance Checker
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Apply SCC role on Linux devices
+      ansible.builtin.include_role:
+        name: scc
+      when: ansible_os_family != 'Windows'
+      become: true
+
+    - name: Apply SCC role on Windows devices
+      ansible.builtin.include_role:
+        name: scc
+      when: ansible_os_family == 'Windows'

@@ -1,0 +1,37 @@
+---
+- name: Ensure C:\Temp\scc directory exists
+  ansible.windows.win_file:
+    path: C:\Temp\scc
+    state: directory
+
+- name: Copy SCC installer to Windows target
+  ansible.windows.win_copy:
+    src: "scc/{{ scc_windows_installer | default('SCC_Windows_Setup.msi') }}"
+    dest: C:\Temp\scc\scc-installer.msi
+
+- name: Install SCC on Windows
+  ansible.windows.win_package:
+    path: C:\Temp\scc\scc-installer.msi
+    state: present
+
+- name: Run SCC local scan on Windows
+  ansible.windows.win_command:
+    cmd: '"C:\Program Files\SCAP Compliance Checker\cscc.exe" --scan'
+  register: scc_windows_scan
+  changed_when: "scc_windows_scan.rc == 0"
+  ignore_errors: true
+
+- name: Find SCC scan results archive on Windows
+  ansible.windows.win_find:
+    paths: 'C:\ProgramData\SCAP Compliance Checker\Sessions'
+    patterns: '*_Results_*.zip'
+    recurse: true
+  register: scc_windows_results
+
+- name: Fetch Windows scan results to controller
+  ansible.builtin.fetch:
+    src: "{{ item.path }}"
+    dest: "scc_results/{{ inventory_hostname }}/"
+    flat: true
+  loop: "{{ scc_windows_results.files }}"
+  when: scc_windows_results.matched > 0

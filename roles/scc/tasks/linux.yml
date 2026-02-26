@@ -1,0 +1,48 @@
+---
+- name: Ensure /tmp/scc directory exists
+  ansible.builtin.file:
+    path: /tmp/scc
+    state: directory
+    mode: '0755'
+
+- name: Copy SCC installer to Linux target
+  ansible.builtin.copy:
+    # Set the appropriate variables: scc_deb_installer or scc_rpm_installer, or name the files accordingly in files/scc/
+    src: "scc/{{ scc_deb_installer | default('scc-5.9.deb') if ansible_os_family == 'Debian' else scc_rpm_installer | default('scc-5.9.rpm') }}"
+    dest: "/tmp/scc/scc-installer{{ '.deb' if ansible_os_family == 'Debian' else '.rpm' }}"
+    mode: '0644'
+
+- name: Install SCC on RedHat variants
+  ansible.builtin.yum:
+    name: "/tmp/scc/scc-installer.rpm"
+    state: present
+    disable_gpg_check: true
+  when: ansible_os_family == 'RedHat'
+
+- name: Install SCC on Debian variants
+  ansible.builtin.apt:
+    deb: "/tmp/scc/scc-installer.deb"
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: Run SCC local scan on Linux
+  ansible.builtin.command:
+    cmd: /opt/scc/cscc --scan
+  register: scc_linux_scan
+  changed_when: "scc_linux_scan.rc == 0"
+  ignore_errors: true
+
+- name: Find SCC scan results archive
+  ansible.builtin.find:
+    paths: /var/opt/scc/Sessions
+    patterns: "*_Results_*.zip"
+    recurse: true
+  register: scc_linux_results
+
+- name: Fetch Linux scan results to controller
+  ansible.builtin.fetch:
+    src: "{{ item.path }}"
+    dest: "scc_results/{{ inventory_hostname }}/"
+    flat: true
+  loop: "{{ scc_linux_results.files }}"
+  when: scc_linux_results.matched > 0
