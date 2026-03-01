@@ -43,17 +43,16 @@
   changed_when: "scc_linux_scan.rc == 0"
   ignore_errors: true
 
-- name: Find SCC scan results archive
-  ansible.builtin.find:
-    paths: "~/SCC/Sessions"
-    patterns: "*_Results_*.zip"
-    recurse: true
-  register: scc_linux_results
+- name: Archive SCC sessions directory for fetching
+  ansible.builtin.shell:
+    cmd: "cd ~/SCC/Sessions && tar -czf /tmp/scc_sessions.tar.gz ."
+  register: scc_linux_archive
+  changed_when: false
+  ignore_errors: true
 
-- name: Fetch Linux scan results to controller
+- name: Fetch Linux scan results archive to controller
   ansible.builtin.fetch:
-    src: "{{ item.path }}"
-    dest: "scc_results/{{ inventory_hostname }}/"
+    src: "/tmp/scc_sessions.tar.gz"
+    dest: "scc_results/{{ inventory_hostname }}/scc_sessions.tar.gz"
     flat: true
-  loop: "{{ scc_linux_results.files }}"
-  when: scc_linux_results.matched > 0
+  when: scc_linux_archive.rc == 0
