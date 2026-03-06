@@ -23,8 +23,8 @@
 - name: Fix CentOS 7 and 8 EOL repositories (switch to vault)
   ansible.builtin.shell:
     cmd: |
-      sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
-      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+      sed -i 's/^mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-*.repo /etc/yum.repos.d/CentOS-Base.repo 2>/dev/null || true
+      sed -i 's|^#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*.repo /etc/yum.repos.d/CentOS-Base.repo 2>/dev/null || true
   when:
     - ansible_distribution == 'CentOS'
     - ansible_distribution_major_version in ['7', '8']
@@ -44,6 +44,25 @@
   when:
     - ansible_os_family == 'RedHat'
     - "'fail2ban' in packages | default([])"
+
+- name: Fix EPEL 7 and 8 EOL repositories (switch to archive)
+  ansible.builtin.shell:
+    cmd: |
+      if ls /etc/yum.repos.d/epel*.repo >/dev/null 2>&1; then
+        sed -i 's/^metalink=/#metalink=/g' /etc/yum.repos.d/epel*.repo
+        sed -i 's|^#baseurl=https\?://download.fedoraproject.org/pub/epel/|baseurl=https://archives.fedoraproject.org/pub/archive/epel/|g' /etc/yum.repos.d/epel*.repo
+      fi
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version in ['7', '8']
+  changed_when: false
+
+- name: Clean yum metadata to force refresh (RedHat)
+  ansible.builtin.command: yum clean all
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version in ['7', '8']
+  changed_when: false
 
 - name: Install Linux packages from repos
   ansible.builtin.package:
