@@ -30,7 +30,8 @@
           sed -i 's/^#mirrorlist=/#mirrorlist=/g' "$file" 2>/dev/null
           sed -i 's/^#baseurl=/baseurl=/g' "$file"
           sed -i 's/^# baseurl=/baseurl=/g' "$file"
-          sed -i 's/mirror.centos.org/vault.centos.org/g' "$file"
+          sed -i 's|http://mirror.centos.org|http://vault.centos.org|g' "$file"
+          sed -i 's|$contentdir|centos|g' "$file"
         fi
       done
   when:
@@ -67,6 +68,7 @@
     name: "/tmp/fail2ban_install/epel-release-*.rpm"
     state: present
     disable_gpg_check: true
+    disablerepo: "*"
   when:
     - ansible_os_family == 'RedHat'
     - "'fail2ban' in packages | default([])"
@@ -77,6 +79,7 @@
     name: "/tmp/fail2ban_install/*el7*.rpm"
     state: present
     disable_gpg_check: true
+    disablerepo: "*"
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == '7'
@@ -87,6 +90,7 @@
     name: "/tmp/fail2ban_install/*el8*.rpm"
     state: present
     disable_gpg_check: true
+    disablerepo: "*"
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == '8'
