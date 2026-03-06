@@ -45,25 +45,68 @@
     cache_valid_time: 3600
   when: ansible_os_family == 'Debian'
 
-- name: Install epel-release for fail2ban (RedHat)
-  ansible.builtin.package:
-    name: epel-release
+# -----------------------------------------------------------------------------
+# Fail2ban offline package installation
+# -----------------------------------------------------------------------------
+- name: Create fail2ban install directory
+  ansible.builtin.file:
+    path: /tmp/fail2ban_install
+    state: directory
+    mode: "0755"
+  when: "'fail2ban' in packages | default([])"
+
+- name: Copy fail2ban offline packages to remote host
+  ansible.builtin.copy:
+    src: "files/fail2ban/"
+    dest: /tmp/fail2ban_install/
+    mode: "0644"
+  when: "'fail2ban' in packages | default([])"
+
+- name: Install epel-release offline (RedHat)
+  ansible.builtin.yum:
+    name: "/tmp/fail2ban_install/epel-release-*.rpm"
     state: present
+    disable_gpg_check: true
   when:
     - ansible_os_family == 'RedHat'
     - "'fail2ban' in packages | default([])"
+  failed_when: false
 
-- name: Fix EPEL 7 and 8 EOL repositories (switch to archive)
-  ansible.builtin.shell:
-    cmd: |
-      if ls /etc/yum.repos.d/epel*.repo >/dev/null 2>&1; then
-        sed -i 's/^metalink=/#metalink=/g' /etc/yum.repos.d/epel*.repo
-        sed -i 's|^#baseurl=https\?://download.fedoraproject.org/pub/epel/|baseurl=https://archives.fedoraproject.org/pub/archive/epel/|g' /etc/yum.repos.d/epel*.repo
-      fi
+- name: Install fail2ban from local packages (RedHat/CentOS 7)
+  ansible.builtin.yum:
+    name: "/tmp/fail2ban_install/*el7*.rpm"
+    state: present
+    disable_gpg_check: true
   when:
     - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version in ['7', '8']
-  changed_when: false
+    - ansible_distribution_major_version == '7'
+    - "'fail2ban' in packages | default([])"
+
+- name: Install fail2ban from local packages (RedHat/CentOS 8)
+  ansible.builtin.yum:
+    name: "/tmp/fail2ban_install/*el8*.rpm"
+    state: present
+    disable_gpg_check: true
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version == '8'
+    - "'fail2ban' in packages | default([])"
+
+- name: Install fail2ban from local packages (Debian)
+  ansible.builtin.apt:
+    deb: "{{ item }}"
+    state: present
+  with_fileglob:
+    - "/tmp/fail2ban_install/*.deb"
+  when:
+    - ansible_os_family == 'Debian'
+    - "'fail2ban' in packages | default([])"
+
+- name: Clean up fail2ban install directory
+  ansible.builtin.file:
+    path: /tmp/fail2ban_install
+    state: absent
+  when: "'fail2ban' in packages | default([])"
 
 - name: Clean yum metadata to force refresh (RedHat)
   ansible.builtin.command: yum clean all
@@ -72,11 +115,12 @@
     - ansible_distribution_major_version in ['7', '8']
   changed_when: false
 
+
 - name: Install Linux packages from repos
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
-  loop: "{{ packages | default([]) | reject('equalto', 'fireeye-agent') | list }}"
+  loop: "{{ packages | default([]) | reject('equalto', 'fireeye-agent') | reject('equalto', 'fail2ban') | list }}"
   register: linux_package_result
 
 - name: Display Linux package installation results
