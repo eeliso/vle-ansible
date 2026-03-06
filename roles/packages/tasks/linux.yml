@@ -64,37 +64,31 @@
   when: "'fail2ban' in packages | default([])"
 
 - name: Install epel-release offline (RedHat)
-  ansible.builtin.yum:
-    name: "/tmp/fail2ban_install/epel-release-*.rpm"
-    state: present
-    disable_gpg_check: true
-    disablerepo: "*"
+  ansible.builtin.shell:
+    cmd: "yum localinstall -y /tmp/fail2ban_install/epel-release-*.rpm --disablerepo=*"
   when:
     - ansible_os_family == 'RedHat'
     - "'fail2ban' in packages | default([])"
   failed_when: false
+  changed_when: false
 
 - name: Install fail2ban from local packages (RedHat/CentOS 7)
-  ansible.builtin.yum:
-    name: "/tmp/fail2ban_install/*el7*.rpm"
-    state: present
-    disable_gpg_check: true
-    disablerepo: "*"
+  ansible.builtin.shell:
+    cmd: "yum localinstall -y /tmp/fail2ban_install/*el7*.rpm --disablerepo=*"
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == '7'
     - "'fail2ban' in packages | default([])"
+  changed_when: false
 
 - name: Install fail2ban from local packages (RedHat/CentOS 8)
-  ansible.builtin.yum:
-    name: "/tmp/fail2ban_install/*el8*.rpm"
-    state: present
-    disable_gpg_check: true
-    disablerepo: "*"
+  ansible.builtin.shell:
+    cmd: "yum localinstall -y /tmp/fail2ban_install/*el8*.rpm --disablerepo=*"
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version == '8'
     - "'fail2ban' in packages | default([])"
+  changed_when: false
 
 - name: Install fail2ban from local packages (Debian)
   ansible.builtin.apt:
