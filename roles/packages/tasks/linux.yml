@@ -91,14 +91,12 @@
   changed_when: false
 
 - name: Install fail2ban from local packages (Debian)
-  ansible.builtin.apt:
-    deb: "{{ item }}"
-    state: present
-  with_fileglob:
-    - "/tmp/fail2ban_install/*.deb"
+  ansible.builtin.shell:
+    cmd: "apt-get install -y /tmp/fail2ban_install/*.deb"
   when:
     - ansible_os_family == 'Debian'
     - "'fail2ban' in packages | default([])"
+  changed_when: false
 
 - name: Clean up fail2ban install directory
   ansible.builtin.file:
