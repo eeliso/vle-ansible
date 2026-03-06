@@ -104,6 +104,13 @@
     state: absent
   when: "'fail2ban' in packages | default([])"
 
+- name: Enable and start fail2ban service
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true
+  when: "'fail2ban' in packages | default([])"
+
 - name: Clean yum metadata to force refresh (RedHat)
   ansible.builtin.command: yum clean all
   when:
@@ -123,13 +130,6 @@
   ansible.builtin.debug:
     msg: "Installed {{ linux_package_result.results | selectattr('changed', 'equalto', true) | list | length }} repo package(s)"
   when: linux_package_result.results | default([]) | length > 0
-
-- name: Enable and start fail2ban service
-  ansible.builtin.service:
-    name: fail2ban
-    state: started
-    enabled: true
-  when: "'fail2ban' in packages | default([])"
 
 # -----------------------------------------------------------------------------
 # FireEye agent from local .tgz
