@@ -26,6 +26,14 @@
     cache_valid_time: 3600
   when: ansible_os_family == 'Debian'
 
+- name: Install epel-release for fail2ban (RedHat)
+  ansible.builtin.package:
+    name: epel-release
+    state: present
+  when:
+    - ansible_os_family == 'RedHat'
+    - "'fail2ban' in packages | default([])"
+
 - name: Install Linux packages from repos
   ansible.builtin.package:
     name: "{{ item }}"
@@ -37,6 +45,13 @@
   ansible.builtin.debug:
     msg: "Installed {{ linux_package_result.results | selectattr('changed', 'equalto', true) | list | length }} repo package(s)"
   when: linux_package_result.results | default([]) | length > 0
+
+- name: Enable and start fail2ban service
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true
+  when: "'fail2ban' in packages | default([])"
 
 # -----------------------------------------------------------------------------
 # FireEye agent from local .tgz
