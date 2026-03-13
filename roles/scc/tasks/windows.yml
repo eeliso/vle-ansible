@@ -11,7 +11,7 @@
 
 - name: Install SCC on Windows
   ansible.windows.win_command:
-    cmd: C:\Temp\scc\SCC_5.14_Windows_Setup.exe /S /v"/qn"
+    cmd: C:\Temp\scc\SCC_5.14_Windows_Setup.exe /S /v"/qn /l*v C:\Temp\scc_install.log"
   register: scc_install_result
   changed_when: scc_install_result.rc in [0, 3010]
   failed_when: scc_install_result.rc not in [0, 3010]
