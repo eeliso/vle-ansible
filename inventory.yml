@@ -164,8 +164,8 @@ all:
     windows:
       hosts:
         monitor.ldil.vle.fi:
-          ansible_port: 5986
-          ansible_winrm_scheme: https
+          ansible_port: 5985
+          ansible_winrm_scheme: http
           packages:
             - fireeye-agent
           config_files: []
@@ -179,16 +179,16 @@ all:
         #  patch: true
 
         files.ldil.vle.fi:
-          ansible_port: 5986
-          ansible_winrm_scheme: https
+          ansible_port: 5985
+          ansible_winrm_scheme: http
           packages:
             - fireeye-agent
           config_files: []
           patch: false
 
         dev-ws1.ldil.vle.fi:
-          ansible_port: 5986
-          ansible_winrm_scheme: https
+          ansible_port: 5985
+          ansible_winrm_scheme: http
           ansible_user: user
           packages:
             - fireeye-agent
@@ -196,8 +196,8 @@ all:
           patch: true
 
         legacy-app.ldil.vle.fi:
-          ansible_port: 5986
-          ansible_winrm_scheme: https
+          ansible_port: 5985
+          ansible_winrm_scheme: http
           packages:
             - fireeye-agent
           config_files: []
