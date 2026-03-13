@@ -9,12 +9,41 @@
     src: "scc-5.14_Windows/SCC_5.14_Windows_Setup.exe"
     dest: C:\Temp\scc\SCC_5.14_Windows_Setup.exe
 
-- name: Install SCC on Windows
-  ansible.windows.win_command:
-    cmd: C:\Temp\scc\SCC_5.14_Windows_Setup.exe /S /v"/qn /l*v C:\Temp\scc_install.log"
+- name: Check if SCC is already installed
+  ansible.windows.win_stat:
+    path: 'C:\Program Files\SCAP Compliance Checker\cscc.exe'
+  register: scc_installed
+
+- name: Install SCC on Windows (InstallShield silent mode)
+  ansible.windows.win_package:
+    path: C:\Temp\scc\SCC_5.14_Windows_Setup.exe
+    arguments:
+      - /S
+      - /v"/qn /l*v C:\Temp\scc_install.log REBOOT=ReallySuppress"
+    expected_return_code: [0, 3010]
   register: scc_install_result
-  changed_when: scc_install_result.rc in [0, 3010]
-  failed_when: scc_install_result.rc not in [0, 3010]
+  timeout: 300
+  when: not scc_installed.stat.exists
+
+- name: Fallback - Install SCC on Windows (Inno Setup silent mode)
+  ansible.windows.win_command:
+    cmd: >-
+      C:\Temp\scc\SCC_5.14_Windows_Setup.exe
+      /VERYSILENT /SUPPRESSMSGBOXES /NORESTART
+      /LOG="C:\Temp\scc_install.log"
+  register: scc_install_fallback
+  timeout: 300
+  when:
+    - not scc_installed.stat.exists
+    - scc_install_result is defined
+    - scc_install_result is failed
+  ignore_errors: true
+
+- name: Check SCC installed successfully
+  ansible.windows.win_stat:
+    path: 'C:\Program Files\SCAP Compliance Checker\cscc.exe'
+  register: scc_post_install
+  failed_when: not scc_post_install.stat.exists
 
 - name: Run SCC local scan on Windows
   ansible.windows.win_command:
