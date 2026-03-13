@@ -35,6 +35,7 @@
       [base]
       name=CentOS-7 - Base
       baseurl=http://vault.epel.cloud/centos/7/os/$basearch/
+      fallbackmirror=http://vault.centos.org/centos/7/os/$basearch/
       gpgcheck=1
       gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
       enabled=1
@@ -42,6 +43,7 @@
       [updates]
       name=CentOS-7 - Updates
       baseurl=http://vault.epel.cloud/centos/7/updates/$basearch/
+      fallbackmirror=http://vault.centos.org/centos/7/updates/$basearch/
       gpgcheck=1
       gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
       enabled=1
@@ -49,6 +51,7 @@
       [extras]
       name=CentOS-7 - Extras
       baseurl=http://vault.epel.cloud/centos/7/extras/$basearch/
+      fallbackmirror=http://vault.centos.org/centos/7/extras/$basearch/
       gpgcheck=1
       gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
       enabled=1
@@ -64,6 +67,7 @@
       [baseos]
       name=CentOS Linux 8 - BaseOS
       baseurl=http://vault.epel.cloud/centos/8/BaseOS/$basearch/os/
+      fallbackmirror=http://vault.centos.org/centos/8/BaseOS/$basearch/os/
       gpgcheck=1
       enabled=1
       gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
@@ -71,6 +75,7 @@
       [appstream]
       name=CentOS Linux 8 - AppStream
       baseurl=http://vault.epel.cloud/centos/8/AppStream/$basearch/os/
+      fallbackmirror=http://vault.centos.org/centos/8/AppStream/$basearch/os/
       gpgcheck=1
       enabled=1
       gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
@@ -78,6 +83,7 @@
       [extras]
       name=CentOS Linux 8 - Extras
       baseurl=http://vault.epel.cloud/centos/8/extras/$basearch/os/
+      fallbackmirror=http://vault.centos.org/centos/8/extras/$basearch/os/
       gpgcheck=1
       enabled=1
       gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial

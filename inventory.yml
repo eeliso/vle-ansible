@@ -80,13 +80,13 @@ all:
           config_files: []
           patch: true
 
-        www.ldil.vle.fi:
-          packages:
-            - fireeye-agent
-            - filebeat
-            - fail2ban
-          config_files: []
-          patch: true
+        #www.ldil.vle.fi: # THIS DOESNT RESPOND
+        #  packages:
+        #    - fireeye-agent
+        #    - filebeat
+        #    - fail2ban
+        #  config_files: []
+        #  patch: true
 
         mail.ldil.vle.fi:
           packages:
