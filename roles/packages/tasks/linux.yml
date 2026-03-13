@@ -20,24 +20,73 @@
   when: ansible_os_family == 'RedHat'
   changed_when: false
 
-- name: Fix CentOS 7 and 8 EOL repositories (switch to vault)
-  ansible.builtin.shell:
-    cmd: |
-      # Fix CentOS 7 and 8 base repos to use vault with HTTPS to avoid curl connection resets
-      for file in /etc/yum.repos.d/CentOS-*.repo /etc/yum.repos.d/CentOS-Linux-*.repo /etc/yum.repos.d/CentOS-Stream-*.repo; do
-        if [ -f "$file" ]; then
-          sed -i 's/^mirrorlist=/#mirrorlist=/g' "$file"
-          sed -i 's/^#mirrorlist=/#mirrorlist=/g' "$file" 2>/dev/null
-          sed -i 's/^[ \t]*#*[ \t]*baseurl[ \t]*=/baseurl=/g' "$file"
-          sed -i 's|http://mirror.centos.org|http://vault.epel.cloud|g' "$file"
-          sed -i 's|https://mirror.centos.org|http://vault.epel.cloud|g' "$file"
-          sed -i 's|http://vault.centos.org|http://vault.epel.cloud|g' "$file"
-          sed -i 's|https://vault.centos.org|http://vault.epel.cloud|g' "$file"
-          sed -i 's|$contentdir|centos|g' "$file"
-        fi
-      done
-      # Clean cache to ensure new repos are used immediately
-      rm -rf /var/cache/yum/* /var/cache/dnf/*
+- name: Remove all default CentOS repo files to avoid conflicts
+  ansible.builtin.shell: rm -f /etc/yum.repos.d/CentOS-*.repo
+  when:
+    - ansible_distribution == 'CentOS'
+    - ansible_distribution_major_version in ['7', '8']
+  changed_when: false
+
+- name: Create CentOS 7 Vault Repo
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/CentOS-Vault.repo
+    mode: "0644"
+    content: |
+      [base]
+      name=CentOS-7 - Base
+      baseurl=http://vault.epel.cloud/centos/7/os/$basearch/
+      gpgcheck=1
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+      enabled=1
+
+      [updates]
+      name=CentOS-7 - Updates
+      baseurl=http://vault.epel.cloud/centos/7/updates/$basearch/
+      gpgcheck=1
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+      enabled=1
+
+      [extras]
+      name=CentOS-7 - Extras
+      baseurl=http://vault.epel.cloud/centos/7/extras/$basearch/
+      gpgcheck=1
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+      enabled=1
+  when:
+    - ansible_distribution == 'CentOS'
+    - ansible_distribution_major_version == '7'
+
+- name: Create CentOS 8 Vault Repo
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/CentOS-Vault.repo
+    mode: "0644"
+    content: |
+      [baseos]
+      name=CentOS Linux 8 - BaseOS
+      baseurl=http://vault.epel.cloud/centos/8/BaseOS/$basearch/os/
+      gpgcheck=1
+      enabled=1
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+      [appstream]
+      name=CentOS Linux 8 - AppStream
+      baseurl=http://vault.epel.cloud/centos/8/AppStream/$basearch/os/
+      gpgcheck=1
+      enabled=1
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+
+      [extras]
+      name=CentOS Linux 8 - Extras
+      baseurl=http://vault.epel.cloud/centos/8/extras/$basearch/os/
+      gpgcheck=1
+      enabled=1
+      gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+  when:
+    - ansible_distribution == 'CentOS'
+    - ansible_distribution_major_version == '8'
+
+- name: Clean cache to ensure new base repos are used
+  ansible.builtin.shell: rm -rf /var/cache/yum/* /var/cache/dnf/*
   when:
     - ansible_distribution == 'CentOS'
     - ansible_distribution_major_version in ['7', '8']
@@ -61,19 +110,34 @@
     - ansible_os_family == 'RedHat'
     - "'fail2ban' in packages | default([])"
 
-- name: Fix EPEL repositories (RedHat 7 and 8)
-  ansible.builtin.shell:
-    cmd: |
-      for file in /etc/yum.repos.d/epel*.repo; do
-        if [ -f "$file" ]; then
-          sed -i 's/^[ \t]*metalink[ \t]*=/#metalink=/g' "$file"
-          sed -i 's/^[ \t]*#*[ \t]*baseurl[ \t]*=/baseurl=/g' "$file"
-          sed -i 's|http://download.fedoraproject.org/pub/epel|https://archives.fedoraproject.org/pub/archive/epel|g' "$file"
-          sed -i 's|https://download.fedoraproject.org/pub/epel|https://archives.fedoraproject.org/pub/archive/epel|g' "$file"
-        fi
-      done
-      # Clean cache immediately for EPEL
-      rm -rf /var/cache/yum/* /var/cache/dnf/*
+- name: Fix EPEL repository (CentOS 7 Archive)
+  ansible.builtin.copy:
+    dest: /etc/yum.repos.d/epel.repo
+    mode: "0644"
+    content: |
+      [epel]
+      name=Extra Packages for Enterprise Linux 7 - $basearch
+      baseurl=https://archives.fedoraproject.org/pub/archive/epel/7/$basearch
+      failovermethod=priority
+      enabled=1
+      gpgcheck=0
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version == '7'
+
+- name: Fix EPEL repository (CentOS 8 Restore Metalink)
+  ansible.builtin.shell: |
+    # Undo any previous sed corruptions by restoring the original EPEL 8 configuration formatting
+    sed -i 's/^#metalink/metalink/' /etc/yum.repos.d/epel.repo 2>/dev/null || true
+    sed -i 's/^baseurl/#baseurl/' /etc/yum.repos.d/epel.repo 2>/dev/null || true
+    sed -i 's|https://archives.fedoraproject.org/pub/archive/epel|https://download.fedoraproject.org/pub/epel|g' /etc/yum.repos.d/epel.repo 2>/dev/null || true
+  when:
+    - ansible_os_family == 'RedHat'
+    - ansible_distribution_major_version == '8'
+  changed_when: false
+
+- name: Clean cache immediately for EPEL
+  ansible.builtin.shell: rm -rf /var/cache/yum/* /var/cache/dnf/*
   when:
     - ansible_os_family == 'RedHat'
     - ansible_distribution_major_version in ['7', '8']
