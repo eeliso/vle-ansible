@@ -47,69 +47,15 @@
   when: ansible_os_family == 'Debian'
 
 # -----------------------------------------------------------------------------
-# Fail2ban offline package installation
+# Extra Repositories
 # -----------------------------------------------------------------------------
-- name: Create fail2ban install directory
-  ansible.builtin.file:
-    path: /tmp/fail2ban_install
-    state: directory
-    mode: "0755"
-  when: "'fail2ban' in packages | default([])"
-
-- name: Copy fail2ban offline packages to remote host
-  ansible.builtin.copy:
-    src: "files/fail2ban/"
-    dest: /tmp/fail2ban_install/
-    mode: "0644"
-  when: "'fail2ban' in packages | default([])"
-
-- name: Install epel-release offline (RedHat)
-  ansible.builtin.shell:
-    cmd: "yum localinstall -y /tmp/fail2ban_install/epel-release-*.rpm --disablerepo=*"
+- name: Install epel-release (RedHat)
+  ansible.builtin.package:
+    name: epel-release
+    state: present
   when:
     - ansible_os_family == 'RedHat'
     - "'fail2ban' in packages | default([])"
-  failed_when: false
-  changed_when: false
-
-- name: Install fail2ban from local packages (RedHat/CentOS 7)
-  ansible.builtin.shell:
-    cmd: "yum localinstall -y /tmp/fail2ban_install/*el7*.rpm --disablerepo=*"
-  when:
-    - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version == '7'
-    - "'fail2ban' in packages | default([])"
-  changed_when: false
-
-- name: Install fail2ban from local packages (RedHat/CentOS 8)
-  ansible.builtin.shell:
-    cmd: "yum localinstall -y /tmp/fail2ban_install/*el8*.rpm --disablerepo=*"
-  when:
-    - ansible_os_family == 'RedHat'
-    - ansible_distribution_major_version == '8'
-    - "'fail2ban' in packages | default([])"
-  changed_when: false
-
-- name: Install fail2ban from local packages (Debian)
-  ansible.builtin.shell:
-    cmd: "apt-get install -y /tmp/fail2ban_install/*.deb"
-  when:
-    - ansible_os_family == 'Debian'
-    - "'fail2ban' in packages | default([])"
-  changed_when: false
-
-- name: Clean up fail2ban install directory
-  ansible.builtin.file:
-    path: /tmp/fail2ban_install
-    state: absent
-  when: "'fail2ban' in packages | default([])"
-
-- name: Enable and start fail2ban service
-  ansible.builtin.service:
-    name: fail2ban
-    state: started
-    enabled: true
-  when: "'fail2ban' in packages | default([])"
 
 - name: Clean yum metadata to force refresh (RedHat)
   ansible.builtin.command: yum clean all
@@ -119,17 +65,27 @@
   changed_when: false
 
 
+# -----------------------------------------------------------------------------
+# Package Installation (from repos)
+# -----------------------------------------------------------------------------
 - name: Install Linux packages from repos
   ansible.builtin.package:
     name: "{{ item }}"
     state: present
-  loop: "{{ packages | default([]) | reject('equalto', 'fireeye-agent') | reject('equalto', 'fail2ban') | list }}"
+  loop: "{{ packages | default([]) | reject('equalto', 'fireeye-agent') | list }}"
   register: linux_package_result
 
 - name: Display Linux package installation results
   ansible.builtin.debug:
     msg: "Installed {{ linux_package_result.results | selectattr('changed', 'equalto', true) | list | length }} repo package(s)"
   when: linux_package_result.results | default([]) | length > 0
+
+- name: Enable and start fail2ban service
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true
+  when: "'fail2ban' in packages | default([])"
 
 # -----------------------------------------------------------------------------
 # FireEye agent from local .tgz
